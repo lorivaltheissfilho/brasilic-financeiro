@@ -1518,12 +1518,10 @@ async function importarHistorico(){
   res.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);">⏳ Buscando pedidos...</div>';
 
   try{
-    const resp = await fetch('https://mkgaxpvtmscqacgilyfw.supabase.co/functions/v1/uoou-historico', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rZ2F4cHZ0bXNjcWFjZ2lseWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MDU0OTUsImV4cCI6MjA5MzA4MTQ5NX0.st730hrAVzUML-JLgXYlImjNNRcUgjFGu82tpdWPanE'},
-      body: JSON.stringify({de, ate})
+    const { data, error: fnErr } = await supa.functions.invoke('uoou-historico', {
+      body: { de, ate }
     });
-    const data = await resp.json();
+    if(fnErr) throw new Error(fnErr.message);
     if(data.error){
       res.innerHTML=`<div style="color:var(--danger);padding:12px;background:var(--dlight);border-radius:8px;">${data.error}</div>`;
       return;
