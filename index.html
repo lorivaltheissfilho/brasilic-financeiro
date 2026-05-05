@@ -1518,8 +1518,9 @@ async function importarHistorico(){
   res.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);">⏳ Buscando pedidos...</div>';
 
   try{
-    const { data, error: fnErr } = await supa.functions.invoke('uoou-historico', {
-      body: { de, ate }
+    const { data, error: fnErr } = await supa.rpc('importar_historico_uoou', {
+      data_de: de,
+      data_ate: ate
     });
     if(fnErr) throw new Error(fnErr.message);
     if(data.error){
