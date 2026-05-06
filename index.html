@@ -214,7 +214,7 @@ select option{background:var(--surface2);}
   <div class="sh">
     <div class="st">Pedidos / Vendas</div>
     <div class="sa">
-      <select class="btn bg bs2" id="fcanal" onchange="renderPeds()"><option value="">Todos os canais</option><option value="offline">Offline</option><option value="online">Site</option><option value="ml">Mercado Livre</option></select>
+      <select class="btn bg bs2" id="fcanal" onchange="rPeds()"><option value="">Todos os canais</option><option value="offline">Offline</option><option value="online">Site</option><option value="ml">Mercado Livre</option></select>
       <button class="btn bg bs2" onclick="om('mHistorico')" style="border-color:var(--accent);color:var(--accent);">📥 Importar Histórico</button>
       <button class="btn bp" onclick="abrirPed()">+ Novo Pedido</button>
     </div>
@@ -603,8 +603,8 @@ const canL=c=>({offline:'Offline',online:'Site',ml:'Mercado Livre'}[c]||c);
 const canCl=c=>({offline:'boff',online:'bon',ml:'bml'}[c]||'bneu');
 const mg=(cu,v)=>(!cu||!v||cu<=0||v<=0)?null:((v-cu)/v*100).toFixed(1);
 const mgc=m=>m===null?'':m>=40?'g':m>=20?'o':'r';
-const pedTot=p=>p.itens?p.itens.reduce((s,it)=>s+it.pu*it.q,0):p.valor||0;
-const pedLuc=p=>p.itens?p.itens.reduce((s,it)=>{const pr=GP(it.pid);return s+(pr?(it.pu-pr.custo)*it.q:0);},0):0;
+const pedTot=p=>{if(p.itens&&Array.isArray(p.itens)&&p.itens.length>0){const t=p.itens.reduce((s,it)=>s+(Number(it.pu)||0)*(Number(it.q)||0),0);return t>0?t:Number(p.valor)||0;}return Number(p.valor)||0;};
+const pedLuc=p=>{if(!p.itens||!Array.isArray(p.itens))return 0;return p.itens.reduce((s,it)=>{const pr=it.pid?GP(it.pid):null;return s+(pr?(Number(it.pu)-Number(pr.custo))*Number(it.q):0);},0);};
 function stBdg(st,at){
   if(at)return'<span class="badge bdan"><span class="dot"></span>Atrasado</span>';
   return({pago:'<span class="badge bsuc"><span class="dot"></span>Pago</span>',entregue:'<span class="badge bwrn"><span class="dot"></span>Entregue</span>',cancelado:'<span class="badge bneu">Cancelado</span>'}[st])||'<span class="badge bneu"><span class="dot"></span>Pendente</span>';
@@ -1048,7 +1048,7 @@ function rFluxo(){
   // Todos os recebimentos (contas a receber + pedidos pagos)
   const recItems=[
     ...cRec.map(r=>({data:r.venc,val:r.val,desc:r.desc,status:r.status,tipo:'rec',cliente:r.cliente||''})),
-    ...peds.filter(p=>p.status==='pago').map(p=>({data:p.data,val:pedTot(p),desc:`Pedido ${p.cliente||canL(p.canal)}`,status:'pago',tipo:'rec',cliente:p.cliente||''}))
+    ...peds.filter(p=>p.status==='pago'&&p.data).map(p=>({data:p.data,val:pedTot(p),desc:`Pedido ${p.cliente||canL(p.canal)}`,status:'pago',tipo:'rec',cliente:p.cliente||''}))
   ];
   // Todos os pagamentos
   const pagItems=cPag.map(p=>({data:p.venc,val:p.val,desc:p.desc,status:p.status,tipo:'pag'}));
